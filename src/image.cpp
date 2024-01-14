@@ -9,6 +9,7 @@ Image::Image(uint newId, vector<double> *coords, uint cluster) {
     this->coords = coords;
     this->cluster = cluster;
     this->assigned = false;
+    this->checked = false;
 }
 
 Image::~Image() {

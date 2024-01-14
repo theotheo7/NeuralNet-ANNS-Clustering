@@ -20,6 +20,9 @@ SRCS_CLUSTER = $(SRC)main_cluster.cpp $(SRC)parser.cpp $(SRC)utils.cpp $(SRC)ima
 OBJS_GRAPH = $(BUILD)main_graph.o $(BUILD)parser.o $(BUILD)utils.o $(BUILD)image.o $(BUILD)mrng.o $(BUILD)gnns.o $(BUILD)lsh.o $(BUILD)hash_function.o $(BUILD)hash_table.o $(BUILD)clustering.o $(BUILD)cluster.o $(BUILD)cube.o
 SRCS_GRAPH = $(SRC)main_graph.cpp $(SRC)parser.cpp $(SRC)utils.cpp $(SRC)image.cpp $(SRC)mrng.cpp $(SRC)gnns.cpp $(SRC)lsh.cpp $(SRC)hash_function.cpp $(SRC)hash_table.cpp $(SRC)clustering.cpp $(SRC)cluster.cpp $(SRC)cube.cpp
 
+OBJS_NEURAL = $(BUILD)main_neuralnet.o $(BUILD)parser.o $(BUILD)utils.o $(BUILD)image.o $(BUILD)mrng.o $(BUILD)gnns.o $(BUILD)lsh.o $(BUILD)hash_function.o $(BUILD)hash_table.o $(BUILD)clustering.o $(BUILD)cluster.o $(BUILD)cube.o $(BUILD)neuralnet.o
+SRCS_NEURAL = $(SRC)main_neuralnet.cpp $(SRC)parser.cpp $(SRC)utils.cpp $(SRC)image.cpp $(SRC)mrng.cpp $(SRC)gnns.cpp $(SRC)lsh.cpp $(SRC)hash_function.cpp $(SRC)hash_table.cpp $(SRC)clustering.cpp $(SRC)cluster.cpp $(SRC)cube.cpp $(SRC)neuralnet.cpp
+
 LSH = $(BUILD)lsh
 
 CUBE = $(BUILD)cube
@@ -27,6 +30,8 @@ CUBE = $(BUILD)cube
 CLUSTER = $(BUILD)cluster
 
 GRAPH = $(BUILD)graph_search
+
+NEURALNET = $(BUILD)neuralnet
 
 # Objects
 $(BUILD)main_lsh.o: $(SRC)main_lsh.cpp
@@ -40,6 +45,9 @@ $(BUILD)main_cluster.o: $(SRC)main_cluster.cpp
 
 $(BUILD)main_graph.o: $(SRC)main_graph.cpp
 	$(CXX) -o $(BUILD)main_graph.o $(CFLAGS) -c $(SRC)main_graph.cpp
+
+$(BUILD)main_neuralnet.o: $(SRC)main_neuralnet.cpp
+	$(CXX) -o $(BUILD)main_neuralnet.o $(CFLAGS) -c $(SRC)main_neuralnet.cpp
 
 $(BUILD)parser.o: $(SRC)parser.cpp $(INCLUDE)parser.hpp
 	$(CC) -o $(BUILD)parser.o $(CFLAGS) -c $(SRC)parser.cpp
@@ -74,6 +82,9 @@ $(BUILD)mrng.o: $(SRC)mrng.cpp $(INCLUDE)mrng.hpp
 $(BUILD)gnns.o: $(SRC)gnns.cpp $(INCLUDE)gnns.hpp
 	$(CXX) -o $(BUILD)gnns.o $(CFLAGS) -c $(SRC)gnns.cpp
 
+$(BUILD)neuralnet.o: $(SRC)neuralnet.cpp $(INCLUDE)neuralnet.hpp
+	$(CXX) -o $(BUILD)neuralnet.o $(CFLAGS) -c $(SRC)neuralnet.cpp
+
 # Executables
 $(LSH): $(OBJS_LSH)
 	$(CC) $(CFLAGS) -o $(LSH) $(OBJS_LSH)
@@ -87,10 +98,13 @@ $(CLUSTER): $(OBJS_CLUSTER)
 $(GRAPH): $(OBJS_GRAPH)
 	$(CXX) $(CFLAGS) -o $(GRAPH) $(OBJS_GRAPH)
 
-all: $(CLUSTER) $(CUBE) $(LSH) $(GRAPH)
+$(NEURALNET): $(OBJS_NEURAL)
+	$(CXX) $(CFLAGS) -o $(NEURALNET) $(OBJS_NEURAL)
+
+all: $(CLUSTER) $(CUBE) $(LSH) $(GRAPH) $(NEURALNET)
 
 clean:
-	rm -f $(OBJS_LSH) $(OBJS_CUBE) $(OBJS_CLUSTER) $(OBJS_GRAPH) $(LSH) $(CUBE) $(CLUSTER) $(GRAPH)
+	rm -f $(OBJS_LSH) $(OBJS_CUBE) $(OBJS_CLUSTER) $(OBJS_GRAPH) $(OBJS_NEURAL) $(LSH) $(CUBE) $(CLUSTER) $(GRAPH) $(NEURALNET)
 
 lsh: $(LSH)
 	./$(LSH) -d resources/input.dat -q resources/query.dat -o resources/outputLSH.txt
@@ -111,4 +125,7 @@ graph1: $(GRAPH)
 	./$(GRAPH) -d resources/input.dat -q resources/query.dat -m 1 -o resources/outputGNNS.txt
 
 graph2: $(GRAPH)
-	./$(GRAPH) -d resources/input.dat -q resources/query.dat -m 2 -o resources/outputMRNG.txt
+	./$(GRAPH) -d resources/new_input_file.dat -q resources/new_query_file.dat -m 2 -o resources/outputMRNG.txt
+
+neural0: $(NEURALNET)
+	./$(NEURALNET) -d resources/input.dat -i resources/new_input_file.dat -q resources/query.dat -t resources/new_query_file.dat -m 0 -o resources/outputNeural.txt
