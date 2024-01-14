@@ -14,6 +14,7 @@ private:
     int l;
 
     std::vector<Image *> *data;
+    std::vector<Image *> *newData;
     // Graph representation as adjacency list
     std::vector<std::vector<Image *> *> *graph;
 
@@ -22,7 +23,7 @@ private:
     double totalApproximate;
     double totalTrue;
 
-    double MAF;
+    double totalAF;
 
     std::ofstream output;
 
@@ -36,7 +37,9 @@ public:
     void findStartingNode();
 
     void searchOnGraph(Image *);
+    void searchOnGraphLatent(Image *, std::vector<Image *> *, std::vector<Image *> *);
     std::vector<double> getTrueNeighbors(Image *);
+    double getTrueNeighbor(Image *, std::vector<Image *> *);
 
     void setAllUnchecked();
 

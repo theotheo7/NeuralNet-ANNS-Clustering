@@ -17,8 +17,6 @@ vector<Image *> *Parser::readInputFile(const string &fileName) {
         return imageVector;
     }
 
-    cout << "Successfully opened the input file!" << endl;
-
     ifs.read(reinterpret_cast<char *>(&magicNumber), sizeof(int));
     magicNumber = ntohl(magicNumber);
 
@@ -30,11 +28,6 @@ vector<Image *> *Parser::readInputFile(const string &fileName) {
 
     ifs.read(reinterpret_cast<char *>(&columnNumber), sizeof(int));
     columnNumber = ntohl(columnNumber);
-
-    cout << "Magic number is: " << magicNumber << endl;
-    cout << "Image number is: " << imageNumber << endl;
-    cout << "Row number is: " << rowNumber << endl;
-    cout << "Column number is: " << columnNumber << endl;
 
     const uint32_t imageSize = rowNumber * columnNumber;
     vector<unsigned char> inputVector(imageSize);
@@ -51,8 +44,6 @@ vector<Image *> *Parser::readInputFile(const string &fileName) {
 
         imageVector->push_back(new Image(i+1, coords, 0));
     }
-
-    cout << "Finished reading images!" << endl;
 
     ifs.close();
     return imageVector;

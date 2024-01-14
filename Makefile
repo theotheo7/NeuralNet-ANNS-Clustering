@@ -125,7 +125,13 @@ graph1: $(GRAPH)
 	./$(GRAPH) -d resources/input.dat -q resources/query.dat -m 1 -o resources/outputGNNS.txt
 
 graph2: $(GRAPH)
-	./$(GRAPH) -d resources/new_input_file.dat -q resources/new_query_file.dat -m 2 -o resources/outputMRNG.txt
+	./$(GRAPH) -d resources/input.dat -q resources/query.dat -m 2 -o resources/outputMRNG.txt
 
 neural0: $(NEURALNET)
 	./$(NEURALNET) -d resources/input.dat -i resources/new_input_file.dat -q resources/query.dat -t resources/new_query_file.dat -m 0 -o resources/outputNeural.txt
+
+neural1: $(NEURALNET)
+	./$(NEURALNET) -d resources/input.dat -i resources/new_input_file.dat -q resources/query.dat -t resources/new_query_file.dat -m 1 -o resources/outputNeural.txt
+
+neural2: $(NEURALNET)
+	./$(NEURALNET) -d resources/input.dat -i resources/new_input_file.dat -q resources/query.dat -t resources/new_query_file.dat -m 2 -o resources/outputNeural.txt

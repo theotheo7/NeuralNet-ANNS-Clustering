@@ -98,20 +98,20 @@ int main(int argc, char **argv) {
                 neuralnet->bruteForce(query, queryImages);
             }
 
-            neuralnet->outputTimeMAF(queryImages->size());
+            neuralnet->outputTimeMAF((int)queryImages->size());
 
             delete neuralnet;
 
         } else if (m == 1) {
             // Initialize GNNS object
-            auto gnns = new GNNS(E, R, N, inputImages, outputFile);
+            auto gnns = new GNNS(E, R, N, newInputImages, outputFile);
 
             // Graph construction
-            gnns->constructGraph(inputImages, k);
+            gnns->constructGraph(newInputImages, k);
 
-            for (auto query : *queryImages) {
+            for (auto query : *newQueryImages) {
                 // Run query
-                gnns->search(query);
+                gnns->searchLatent(query, queryImages, inputImages);
             }
 
             gnns->outputTimeMAF((int)queryImages->size());
@@ -120,7 +120,7 @@ int main(int argc, char **argv) {
 
         } else {
             // Initialize MRNG object
-            auto mrng = new MRNG(N, l, inputImages, outputFile);
+            auto mrng = new MRNG(1, l, newInputImages, outputFile);
 
             // Graph construction
             mrng->constructGraph();
@@ -128,9 +128,9 @@ int main(int argc, char **argv) {
             // Find image closest to centroid to use as starting node
             mrng->findStartingNode();
 
-            for (auto queryImage : *queryImages) {
+            for (auto queryImage : *newQueryImages) {
                 // Run query
-                mrng->searchOnGraph(queryImage);
+                mrng->searchOnGraphLatent(queryImage, queryImages, inputImages);
 
                 // Reset image checked flags
                 mrng->setAllUnchecked();
@@ -148,10 +148,20 @@ int main(int argc, char **argv) {
         }
         delete inputImages;
 
+        for (auto image : *newInputImages) {
+            delete image;
+        }
+        delete newInputImages;
+
         for (auto image : *queryImages) {
             delete image;
         }
         delete queryImages;
+
+        for (auto image : *newQueryImages) {
+            delete image;
+        }
+        delete newQueryImages;
 
         cout << "Query finished! Would you like to start a new query? (y/n)" << endl;
         cin >> s;

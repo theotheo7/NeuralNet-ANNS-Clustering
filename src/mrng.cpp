@@ -20,7 +20,7 @@ MRNG::MRNG(int N, int l, vector<Image *> *data, const string& outputFile) {
         graph->push_back(neighbors);
     }
 
-    this->MAF = 1;
+    this->totalAF = 0;
 
     output.open(outputFile, ios::trunc);
     if (!output.is_open()) {
@@ -181,10 +181,77 @@ void MRNG::searchOnGraph(Image *query) {
     this->totalApproximate += tApproximate.count();
 
     // Set MAF
-    double af = candidates.at(0).second / neighborsTrue.at(0);
-    if (af > this->MAF) {
-        this->MAF = af;
+    this->totalAF += candidates.at(0).second / neighborsTrue.at(0);
+
+    // Output results
+    outputResults(candidates, neighborsTrue, query);
+}
+
+void MRNG::searchOnGraphLatent(Image *query, vector<Image *> *queryImages, vector<Image *> *inputImages) {
+    vector<pair<Image *, double>> candidates;
+    vector<Image *> *neighbors;
+    set<uint> neighborsSet;
+    Image *currImage = nullptr;
+    double distance;
+
+    chrono::duration<double> tApproximate{}, tTrue{};
+
+    // Find true neighbors
+    auto startTrue = chrono::high_resolution_clock::now();
+    double neighborTrue = getTrueNeighbor(queryImages->at(query->getId() - 1), inputImages);
+    auto endTrue = chrono::high_resolution_clock::now();
+
+    tTrue = endTrue - startTrue;
+    this->totalTrue += tTrue.count();
+
+    // Approximate search
+    auto startApproximate = chrono::high_resolution_clock::now();
+    distance = dist(this->startingNode->getCoords(), query->getCoords());
+    candidates.emplace_back(this->startingNode, distance);
+    neighborsSet.insert(this->startingNode->getId());
+
+    int i = 1;
+    while (i < this->l) {
+        // Get first unchecked candidate in set
+        for (auto pair : candidates) {
+            if (!pair.first->getChecked()) {
+                currImage = pair.first;
+                currImage->setChecked(true);
+                break;
+            }
+        }
+
+        // Get neighbors from graph
+        neighbors = this->graph->at(currImage->getId() - 1);
+
+        for (auto neighbor : *neighbors) {
+            // If neighbor not already in candidates
+            if (neighborsSet.find(neighbor->getId()) == neighborsSet.end()) {
+                distance = dist(neighbor->getCoords(), query->getCoords());
+                neighborsSet.insert(neighbor->getId());
+                candidates.emplace_back(neighbor, distance);
+                i++;
+            }
+        }
+
+        // Sort candidates based on distance from q
+        sort(candidates.begin(), candidates.end(), sortNeighbors);
     }
+
+    auto neighbor = inputImages->at(candidates.at(0).first->getId() - 1);
+    double distApprox = dist(queryImages->at(query->getId() - 1)->getCoords(), neighbor->getCoords());
+    candidates.clear();
+    candidates.emplace_back(neighbor, distApprox);
+    auto endApproximate = chrono::high_resolution_clock::now();
+
+    tApproximate = endApproximate - startApproximate;
+    this->totalApproximate += tApproximate.count();
+
+    // Set MAF
+    this->totalAF += candidates.at(0).second / neighborTrue;
+
+    vector<double> neighborsTrue;
+    neighborsTrue.push_back(neighborTrue);
 
     // Output results
     outputResults(candidates, neighborsTrue, query);
@@ -201,6 +268,19 @@ vector<double> MRNG::getTrueNeighbors(Image *image) {
     sort(neighborsTrue.begin(), neighborsTrue.end());
 
     return neighborsTrue;
+}
+
+// Function to get the true neighbor
+double MRNG::getTrueNeighbor(Image *image, vector<Image *> *input) {
+    vector<double> neighborsTrue;
+
+    for (auto it : *input) {
+        neighborsTrue.push_back(dist(it->getCoords(), image->getCoords()));
+    }
+
+    sort(neighborsTrue.begin(), neighborsTrue.end());
+
+    return neighborsTrue.at(0);
 }
 
 // Function to reset the checked flag of all images
@@ -239,7 +319,7 @@ void MRNG::outputTimeMAF(int querySize) {
     if (output.is_open()) {
         contents.append("tAverageApproximate: " + to_string(this->totalApproximate / querySize) + "\n");
         contents.append("tAverageTrue: " + to_string(this->totalTrue / querySize) + "\n");
-        contents.append("MAF: " + to_string(this->MAF) + "\n");
+        contents.append("Mean AF: " + to_string(this->totalAF / querySize) + "\n");
 
         output << contents;
     }

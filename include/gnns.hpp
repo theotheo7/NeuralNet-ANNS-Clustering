@@ -21,10 +21,10 @@ class GNNS {
         // Graph representation as adjacency list
         std::vector<std::vector<Image *> *> *graph;
 
-        double MAF;
-
         double totalApproximate;
         double totalTrue;
+
+        double totalAF;
 
         std::ofstream output;
     public:
@@ -32,8 +32,10 @@ class GNNS {
         ~GNNS();
         //std::vector<Image*> search(Image* query);
         void search(Image* query);
+        void searchLatent(Image* query, std::vector<Image *> *, std::vector<Image *> *);
         void constructGraph(std::vector<Image *> *,int);
         std::vector<double> getTrueNeighbors(Image *image);
+        double getTrueNeighbor(Image *image, std::vector<Image *> *);
         void outputResults(std::vector<std::pair<Image *, double>>, std::vector<double>, Image *query);
         void outputTimeMAF(int);
 };
