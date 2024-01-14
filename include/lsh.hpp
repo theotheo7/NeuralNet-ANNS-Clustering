@@ -22,10 +22,10 @@ private:
     std::vector<std::pair<HashTable *, std::vector<HashFunction *>*>> hashTables;
     std::vector<std::vector<int>> r;
 
-    double MAF;
-
     double totalApproximate;
     double totalTrue;
+
+    double totalAF;
 
     std::ofstream output;
 
@@ -47,7 +47,8 @@ public:
     Image *getNeighbor(Image *);
     std::vector<Image *>getNeighborsGNNS(Image *, int);
 
-    void outputResults(std::vector<std::pair<uint, double>>, std::vector<double>, const std::set<uint>&, Image *, double, double);
+    void outputResults(std::vector<std::pair<uint, double>>, std::vector<double>, const std::set<uint>&, Image *);
+    void outputTimeMAF(int);
 
     // Destructor
     ~LSH();

@@ -117,6 +117,7 @@ void LSH::query(Image* q) {
     auto endTrue = chrono::high_resolution_clock::now();
 
     tTrue = endTrue - startTrue;
+    this->totalTrue += tTrue.count();
 
     auto startLSH = chrono::high_resolution_clock::now();
     for (int i = 0; i < L; i++) {
@@ -162,8 +163,11 @@ void LSH::query(Image* q) {
     auto endLSH = chrono::high_resolution_clock::now();
 
     tLSH = endLSH - startLSH;
+    this->totalApproximate += tLSH.count();
 
-    outputResults(neighborsLSH, neighborsTrue, setRNear, q, tLSH.count(), tTrue.count());
+    this->totalAF += neighborsLSH.at(0).second / neighborsTrue.at(0);
+
+    outputResults(neighborsLSH, neighborsTrue, setRNear, q);
 }
 
 std::vector<double> LSH::getTrueNeighbors(Image *image) {
@@ -282,7 +286,7 @@ std::vector<Image*> LSH::getNeighborsGNNS(Image *queryImage, int k) {
 
 void LSH::outputResults(vector<pair<uint, double>> neighborsLSH,
                         vector<double> neighborsTrue, const set<uint>& neighborsRNear,
-                        Image *q, double tLSH, double tTrue) {
+                        Image *q) {
     string contents;
 
     if (output.is_open()) {
@@ -294,8 +298,6 @@ void LSH::outputResults(vector<pair<uint, double>> neighborsLSH,
             contents.append("distanceTrue: " + to_string(neighborsTrue[i]) + "\n");
         }
 
-        contents.append("tLSH: " + to_string(tLSH) + "\n");
-        contents.append("tTrue: " + to_string(tTrue) + "\n");
         contents.append("R-near neighbors:\n");
 
         for (auto nRNear : neighborsRNear) {
@@ -303,6 +305,18 @@ void LSH::outputResults(vector<pair<uint, double>> neighborsLSH,
         }
 
         contents.append("\n");
+
+        output << contents;
+    }
+}
+
+void LSH::outputTimeMAF(int querySize) {
+    string contents;
+
+    if (output.is_open()) {
+        contents.append("tAverageApproximate: " + to_string(this->totalApproximate / querySize) + "\n");
+        contents.append("tAverageTrue: " + to_string(this->totalTrue / querySize) + "\n");
+        contents.append("MAF: " + to_string(this->totalAF / querySize) + "\n");
 
         output << contents;
     }

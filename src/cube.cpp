@@ -114,6 +114,8 @@ void HyperCube::query(void *pointer) {
 
     tTrue = endTrue - startTrue;
 
+    this->totalTrue += tTrue.count();
+
     auto startCube = chrono::high_resolution_clock::now();
     string binary = project(image->getCoords());
     neighborsID = cube->findBucket(binaryToUint(binary));
@@ -151,7 +153,13 @@ void HyperCube::query(void *pointer) {
 
     tCube = endCube - startCube;
 
-    outputResults(neighborsCube, neighborsTrue, neighborsRNear, image, tCube.count(), tTrue.count());
+    this->totalApproximate = tCube.count();
+
+    if (!neighborsCube.empty()) {
+        totalAF += neighborsCube.at(0).second / neighborsTrue.top();
+    }
+
+    outputResults(neighborsCube, neighborsTrue, neighborsRNear, image);
 }
 
 vector<Image *> *HyperCube::reverseSearch(vector<double> *q, int range) {
@@ -206,7 +214,7 @@ priority_queue<double, vector<double>, greater<>> HyperCube::getTrueNeighbors(vo
     return neighborsTrue;
 }
 
-void HyperCube::outputResults(vector<pair<uint, double>> neighborsCube, priority_queue<double, vector<double>, greater<>> neighborsTrue, const list<uint>& neighborsRNear, void *qImage, double tCube, double tTrue) {
+void HyperCube::outputResults(vector<pair<uint, double>> neighborsCube, priority_queue<double, vector<double>, greater<>> neighborsTrue, const list<uint>& neighborsRNear, void *qImage) {
     auto image = (Image *) qImage;
 
     string contents;
@@ -224,8 +232,6 @@ void HyperCube::outputResults(vector<pair<uint, double>> neighborsCube, priority
                 neighborsTrue.pop();
             }
 
-            contents.append("tCube: " + to_string(tCube) + "\n");
-            contents.append("tTrue: " + to_string(tTrue) + "\n");
             contents.append("R-near neighbors:\n");
 
             for (auto r : neighborsRNear) {
@@ -238,4 +244,16 @@ void HyperCube::outputResults(vector<pair<uint, double>> neighborsCube, priority
         output << contents;
     }
 
+}
+
+void HyperCube::outputTimeMAF(int querySize) {
+    string contents;
+
+    if (output.is_open()) {
+        contents.append("tAverageApproximate: " + to_string(this->totalApproximate / querySize) + "\n");
+        contents.append("tAverageTrue: " + to_string(this->totalTrue / querySize) + "\n");
+        contents.append("MAF: " + to_string(this->totalAF / querySize) + "\n");
+
+        output << contents;
+    }
 }

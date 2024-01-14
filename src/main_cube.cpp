@@ -13,7 +13,7 @@ int main(int argc, char **argv) {
     int M = 10;
     int probes = 2;
     int N = 1;
-    int R = 10000;
+    int R = 1000;
 
     string s;
 
@@ -72,6 +72,8 @@ int main(int argc, char **argv) {
         for (auto queryImage : *queryImages) {
             hyperCube.query(queryImage);
         }
+
+        hyperCube.outputTimeMAF((int)queryImages->size());
 
         delete parser;
 
