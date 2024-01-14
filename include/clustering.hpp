@@ -27,6 +27,7 @@ private:
 
     std::vector<Cluster *> *clusters;
     std::vector<double> *silhouetteAvg;
+    double objectiveFunctionValue;
 
     std::ofstream output;
 
@@ -47,7 +48,10 @@ public:
     double minDistanceOfCentroids();
     Cluster *getClosestCentroid(Image *);
 
+    void reverse(std::vector<Image *> *);
+
     void silhouette(std::vector<Image *> *);
+    void objectiveFunction();
 
     void outputResults(bool, const std::string&, double);
 };

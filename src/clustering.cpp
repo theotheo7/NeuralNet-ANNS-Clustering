@@ -13,6 +13,7 @@ Clustering::Clustering(int clusterNum, int L, int kLSH, int M, int kCube, int pr
 
     this->clusters = new vector<Cluster *>;
     this->silhouetteAvg = new vector<double>;
+    this->objectiveFunctionValue = 0;
 
     output.open(outputFile);
     if (!output.is_open()) {
@@ -382,6 +383,33 @@ double averageDistanceToNeighborCluster(Image* image, const std::vector<Cluster*
     return 0.0; // No images in the neighbor cluster (or only itself), return 0
 }
 
+// Function to return clusters to initial dimension
+void Clustering::reverse(std::vector<Image *> *input) {
+    int sizeOfCoords = (int) input->at(0)->getCoords()->size();
+
+    for (auto cluster : *clusters) {
+        auto centroid = cluster->getCentroid();
+        centroid->resize(input->at(0)->getCoords()->size());
+        int clusterSize = (int) cluster->getImages()->size();
+        vector<Image *> temp;
+
+        temp = *cluster->getImages();
+        auto images = cluster->getImages();
+        images->clear();
+        for (auto image : temp) {
+            images->push_back(input->at(image->getId() - 1));
+        }
+
+        for (int i = 0; i < sizeOfCoords; i++) {
+            double total = 0;
+            for (int j = 0; j < clusterSize; j++) {
+                total += cluster->getImages()->at(j)->getCoords()->at(i);
+            }
+            centroid->at(i) = total / clusterSize;
+        }
+    }
+}
+
 void Clustering::silhouette(std::vector<Image *> *images) {
     std::vector<double> s;
     double averageClusterSilhouette = 0.0;
@@ -414,6 +442,33 @@ void Clustering::silhouette(std::vector<Image *> *images) {
     silhouetteAvg->push_back(averageClusterSilhouette); // add average silhouette value for whole dataset
 }
 
+void Clustering::objectiveFunction() {
+    double objectiveFunctionValue = 0.0;
+
+    // Iterate over each cluster
+    for (auto cluster : *clusters) {
+        const vector<double> *centroid = cluster->getCentroid();
+        const vector<Image *> *images = cluster->getImages();
+
+        // Calculate the sum of squared distances for each image in the cluster
+        for (auto image : *images) {
+            const vector<double> *imageCoords = image->getCoords();
+            double squaredDistance = 0.0;
+
+            // Sum up the squared distance between the image and the centroid
+            for (size_t i = 0; i < centroid->size(); ++i) {
+                squaredDistance += pow(imageCoords->at(i) - centroid->at(i), 2);
+            }
+
+            objectiveFunctionValue += squaredDistance;
+        }
+    }
+
+    this->objectiveFunctionValue = objectiveFunctionValue;
+
+    //cout << "Objective function: " << objectiveFunctionValue << endl;
+}
+
 void Clustering::outputResults(bool complete, const string& method, double time) {
     string contents;
 
@@ -441,6 +496,8 @@ void Clustering::outputResults(bool complete, const string& method, double time)
             contents.append(to_string(sil) + ",");
         }
         contents.append("]\n");
+
+        contents.append("Objective function value: " + to_string(this->objectiveFunctionValue) + "\n");
 
         if (complete) {
             contents.append("\n");

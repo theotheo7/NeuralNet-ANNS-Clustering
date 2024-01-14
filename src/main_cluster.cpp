@@ -82,6 +82,7 @@ int main(int argc, char **argv) {
 
     // Calculate the silhouette
     clustering->silhouette(inputImages); //silhouette
+    clustering->objectiveFunction();
 
     clustering->outputResults(complete, method, tCluster.count());
 

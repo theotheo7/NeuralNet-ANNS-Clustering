@@ -1,5 +1,6 @@
 #include <iostream>
 #include <unistd.h>
+#include <cstring>
 #include <vector>
 
 #include "../include/parser.hpp"
@@ -11,12 +12,15 @@ using namespace std;
 
 int main(int argc, char **argv) {
     int opt;
-    string newInputFile, newQueryFile, inputFile, queryFile, outputFile;
-    int k = 50, E = 30, R = 1, N = 1, l = 20, m = 1;
+    string newInputFile, newQueryFile, inputFile, queryFile, outputFile, confFile;
+    int k = 50, m = 0;
+    bool complete = false;
+
+    chrono::duration<double> tCluster{};
 
     string s;
 
-    while((opt = getopt(argc, argv, "d:i:q:t:k:E:R:N:l:m:o:")) != -1) {
+    while((opt = getopt(argc, argv, "d:i:q:t:c:m:o:")) != -1) {
         switch (opt) {
             case 'd':
                 inputFile = optarg;
@@ -30,20 +34,12 @@ int main(int argc, char **argv) {
             case 't':
                 newQueryFile = optarg;
                 break;
-            case 'k':
-                k = stoi(optarg);
-                break;
-            case 'E':
-                E = stoi(optarg);
-                break;
-            case 'R':
-                R = stoi(optarg);
-                break;
-            case 'N':
-                N = stoi(optarg);
-                break;
-            case 'l':
-                l = stoi(optarg);
+            case 'c':
+                if (strcmp(optarg, "omplete")== 0) {
+                    complete = true;
+                } else {
+                    confFile = optarg;
+                }
                 break;
             case 'm':
                 m = stoi(optarg);
@@ -104,7 +100,7 @@ int main(int argc, char **argv) {
 
         } else if (m == 1) {
             // Initialize GNNS object
-            auto gnns = new GNNS(E, R, N, newInputImages, outputFile);
+            auto gnns = new GNNS(30, 1, 1, newInputImages, outputFile);
 
             // Graph construction
             gnns->constructGraph(newInputImages, k);
@@ -118,9 +114,9 @@ int main(int argc, char **argv) {
 
             delete gnns;
 
-        } else {
+        } else if (m == 2) {
             // Initialize MRNG object
-            auto mrng = new MRNG(1, l, newInputImages, outputFile);
+            auto mrng = new MRNG(1, 20, newInputImages, outputFile);
 
             // Graph construction
             mrng->constructGraph();
@@ -140,6 +136,25 @@ int main(int argc, char **argv) {
             mrng->outputTimeMAF((int)queryImages->size());
 
             delete mrng;
+        } else {
+            auto clustering = parser->readClusterConf(confFile, outputFile);
+
+            auto startTime = chrono::high_resolution_clock::now();
+            clustering->initialize(newInputImages);
+
+            clustering->lloyds(newInputImages, 20);
+
+            clustering->reverse(inputImages);
+
+            auto endTime = chrono::high_resolution_clock::now();
+            tCluster = endTime - startTime;
+
+            clustering->silhouette(inputImages);
+            clustering->objectiveFunction();
+
+            clustering->outputResults(false, "Classic", tCluster.count());
+
+            delete clustering;
         }
 
         delete parser;

@@ -113,13 +113,13 @@ cube: $(CUBE)
 	./$(CUBE) -d resources/input.dat -q resources/query.dat -o resources/outputCube.txt
 
 cluster: $(CLUSTER)
-	./$(CLUSTER) -i resources/input.dat -o resources/outputCluster.txt
+	./$(CLUSTER) -i resources/input.dat -o resources/outputCluster.txt -c resources/cluster.conf
 
 clusterLSH: $(CLUSTER)
-	./$(CLUSTER) -i resources/input.dat -o resources/outputCluster.txt -complete -m LSH
+	./$(CLUSTER) -i resources/input.dat -o resources/outputCluster.txt -c resources/cluster.conf -complete -m LSH
 
 clusterCube: $(CLUSTER)
-	./$(CLUSTER) -i resources/input.dat -o resources/outputCluster.txt -m Hypercube
+	./$(CLUSTER) -i resources/input.dat -o resources/outputCluster.txt -c resources/cluster.conf -m Hypercube
 
 graph1: $(GRAPH)
 	./$(GRAPH) -d resources/input.dat -q resources/query.dat -m 1 -o resources/outputGNNS.txt
@@ -135,3 +135,6 @@ neural1: $(NEURALNET)
 
 neural2: $(NEURALNET)
 	./$(NEURALNET) -d resources/input.dat -i resources/new_input_file.dat -q resources/query.dat -t resources/new_query_file.dat -m 2 -o resources/outputNeural.txt
+
+neural3: $(NEURALNET)
+	./$(NEURALNET) -d resources/input.dat -i resources/new_input_file.dat -q resources/query.dat -t resources/new_query_file.dat -c resources/cluster.conf -m 3 -o resources/outputNeural.txt
