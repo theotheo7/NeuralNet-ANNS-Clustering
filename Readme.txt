@@ -90,3 +90,106 @@ by default στο αρχείο resources/outputNeural.txt.
 προηγούμενα παραδοτέα.
 
 Τα προγράμματά μας ελέγχθηκαν και με τη χρήση valgrind για memory leaks.
+
+Σχολιασμός αποτελεσμάτων
+
+Α)
+Η αποτελεσματικότητα του autoencoder ποικίλει με τον αριθμό των epochs και το batch size.
+Ένας μεγαλύτερος αριθμός epochs γενικά βελτιώνει την απόδοση, αλλά μπορεί να είναι υπολογιστικά ακριβός.
+Η ισορροπία μεταξύ epochs και batch size είναι ζωτικής σημασίας για την επίτευξη της βέλτιστης απόδοσης του μοντέλου.
+
+Latent dimension:10
+Number of epochs:50
+Batch Size:128
+Number of filters: 6
+-encoder (32, 64, 128)
+-decoder (64,32,1)
+Training loss: 0.0153
+Validation loss:0.0172
+
+Latent dimension:10
+Number of epochs:20
+Batch Size:128
+Number of filters: 6
+-encoder (32, 64, 128)
+-decoder (64,32,1)
+Training loss: 0.0207
+Validation loss:0.0215
+
+Latent dimension:10
+Number of epochs:10
+Batch Size:64
+Number of filters: 6
+-encoder (32, 64, 128)
+-decoder (64,32,1)
+Training loss: 0.0148
+Validation loss:0.0151
+
+Latent dimension:10
+Number of epochs:25
+Batch Size:64
+Number of filters: 6
+-encoder (32, 64, 128)
+-decoder (64,32,1)
+Training loss: 0.0128
+Validation loss:0.0137
+
+
+Β)
+
+Εξαντλητική αναζήτηση στον νέο χώρο:
+    tAverageApproximate: 0.006533
+    tAverageTrue: 0.066691
+    Mean AF: 3.342196
+
+GNNS στον νέο χώρο:
+    tAverageApproximate: 0.000475
+    tAverageTrue: 0.071317
+    Mean AF: 3.554702
+
+MRNG στον νέο χώρο:
+    tAverageApproximate: 0.000043
+    tAverageTrue: 0.089894
+    Mean AF: 3.223830
+
+LSH στον αρχικό χώρο(deafult παράμετροι):
+    tAverageApproximate: 0.000645
+    tAverageTrue: 0.067850
+    Mean AF: 2.095898
+
+Hypercube στον αρχικό χώρο(deafult παράμετροι):
+    tAverageApproximate: 0.000039
+    tAverageTrue: 0.061093
+    Mean AF: 2.608325
+
+GNNS στον αρχικό χώρο(deafult παράμετροι):
+    tAverageApproximate: 0.002282
+    tAverageTrue: 0.063783
+    Mean AF: 1.459729
+
+Οι GNNS και MRNG μέθοδοι στο νέο χώρο παρέχουν γρήγορες κατά προσέγγιση αναζητήσεις αλλά με συμβιβασμό στην ακρίβεια.
+Οι LSH και Hypercube στον αρχικό χώρο προσφέρουν καλή ισορροπία, αλλά είναι λιγότερο accurate από το GNNS στον αρχικό χώρο.
+Για την εξαντλητική αναζήτηση αναμένεται ο μεγαλύτερος χρόνος αναζήτησης για τους αληθινούς πλησιέστερους γείτονες, καθώς ελέγχει κάθε σημείο του συνόλου δεδομένων.
+
+Γ)
+Cluster στον αρχικό χώρο(deafult παράμετροι):
+    clustering_time: 8.476809
+    Silhouette: [-0.065331,-0.064613,-0.058940,-0.063022,]
+    Objective function value: 9083814736.931107
+
+Cluster στον νέο χώρο(deafult παράμετροι):
+    clustering_time: 0.021539
+    Silhouette: [0.004776,0.005199,0.006111,0.005237,]
+    Objective function value: 10015920666.631937
+
+Παρατηρησαμε ότι το clustering στον νέο χώρο είναι πιο αποδοτικό χρονικά.
+Ωστόσο δεν οδηγεί απαραίτητα σε καλύτερη ποιότητα clustering από άποψη compactness και seperation, 
+όπως υποδεικνύεται από την υψηλότερη τιμή της objective function.
+O μετασχηματισμός ή η μείωση των διαστάσεων μπορεί να οδηγήσει σε απώλεια ορισμένων κρίσιμων πληροφοριών
+που επηρεάζουν την ποιότητα του clustering.
+
+
+
+
+
+
